@@ -1,0 +1,45 @@
+import cv2
+import numpy as np
+
+
+mitad1 = cv2.imread(r'src\OperacionEspejismo2\Mision2\m2_mitad1 1.png')
+mitad2 = cv2.imread(r'src\OperacionEspejismo2\Mision2\m2_mitad2 1.png')
+
+
+lienzo = np.zeros((400, 400, 3), dtype=np.uint8)
+
+# Traslacion
+h1, w1 = mitad1.shape[:2]
+
+# Mover al origen (0,0)
+M_traslacion = np.float32([
+    [1, 0, 0],  # x
+    [0, 1, 0]   # y
+])
+
+mitad1_transformada = cv2.warpAffine(mitad1, M_traslacion, (400, 400))
+
+#Rotacion mitad inferior
+h2, w2 = mitad2.shape[:2]
+
+centro = (w2 // 2, h2 // 2)
+
+# Matriz de rotación 180
+M_rotacion = cv2.getRotationMatrix2D(centro, 180, 1.0)
+
+mitad2_rotada = cv2.warpAffine(mitad2, M_rotacion, (w2, h2))
+
+# Colocar mitad 1 arriba
+lienzo[0:h1, 0:w1] = mitad1_transformada[0:h1, 0:w1]
+
+# Colocar mitad 2 abajo
+inicio_y = 400 - h2
+lienzo[inicio_y:400, 0:w2] = mitad2_rotada
+
+
+cv2.imshow("QR Reconstruido", lienzo)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+# Guardar imagen final
+cv2.imwrite("qr_final.png", lienzo)
